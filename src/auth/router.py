@@ -1,7 +1,8 @@
 from fastapi import APIRouter, status, Depends
 
-from src.auth.dependencies import create_user
-from src.auth.schemas import UserOutputSchema, UserInputSchema
+from src.auth import service
+from src.auth.dependencies import create_user, get_user
+from src.auth.schemas import UserOutputSchema, UserInputSchema, TokenSchema
 
 auth = APIRouter(prefix="/auth")
 
@@ -13,9 +14,12 @@ async def register(user: UserInputSchema = Depends(create_user)):
     return user
 
 
-@auth.post('/log-in/')
-async def login():
-    pass
+@auth.post('/login/',
+           status_code=status.HTTP_200_OK,
+           response_model=TokenSchema)
+async def login(user: UserInputSchema = Depends(get_user)):
+    token = await service.create_user_jwt_token(user)
+    return token
 
 
 @auth.get('/refresh/')

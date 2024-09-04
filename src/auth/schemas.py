@@ -1,6 +1,11 @@
 from pydantic import BaseModel, Field, EmailStr
 
 
+class TokenSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+
+
 class UserOutputSchema(BaseModel):
     id: int
     username: str
