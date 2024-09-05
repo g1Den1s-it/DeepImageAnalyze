@@ -31,13 +31,14 @@ async def create_user_object(user: UserInputSchema, db: AsyncSession) -> User | 
 
 
 async def create_user_jwt_token(user: UserInputSchema) -> TokenSchema:
-    to_encode = {"email": user.email}
+    to_encode = {"email": user.email, "type": "access"}
     expire = datetime.utcnow() + timedelta(minutes=jwt_token_config.ACCESS_TOKEN_EXPIRE_MIN)
     to_encode['expire'] = expire.strftime("%Y-%m-%d %H:%M:%S")
 
     access_token = jwt.encode(to_encode, jwt_token_config.JWT_SECRET, jwt_token_config.JWT_ALG)
 
     refresh_token_payload = {
+        "type": "refresh",
         "sub": user.email,
         "exp": datetime.utcnow() + timedelta(days=jwt_token_config.REFRESH_TOKEN_EXPIRE_DAYS),
     }
@@ -62,3 +63,13 @@ async def get_current_user(user: UserInputSchema, db: AsyncSession) -> UserInput
 
     except Exception as e:
         return
+
+
+async def create_new_access_token(user_data: dict) -> str:
+    payload = user_data
+    expire = datetime.utcnow() + timedelta(minutes=jwt_token_config.ACCESS_TOKEN_EXPIRE_MIN)
+    payload['expire'] = expire.strftime("%Y-%m-%d %H:%M:%S")
+
+    access_token = jwt.encode(payload, jwt_token_config.JWT_SECRET, jwt_token_config.JWT_ALG)
+
+    return access_token

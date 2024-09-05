@@ -17,3 +17,27 @@ class WrongPassword(HTTPException):
     def __init__(self):
         self.message = f"Wrong password!"
         super().__init__(status_code=400, detail=self.message)
+
+
+class UnauthorizedUser(HTTPException):
+    def __init__(self):
+        self.message = "Unauthorized User!"
+        super().__init__(status_code=401, detail=self.message)
+
+
+class InvalidToken(HTTPException):
+    def __init__(self):
+        self.message = "Invalid User Token!"
+        super().__init__(status_code=401, detail=self.message)
+
+
+class TypeToken(HTTPException):
+    def __init__(self):
+        self.message = "Invalid token type!"
+        super().__init__(status_code=401, detail=self.message)
+
+
+class ExpiredToken(HTTPException):
+    def __init__(self):
+        self.message = "Token has expired!"
+        super().__init__(status_code=401, detail=self.message)
