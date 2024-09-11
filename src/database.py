@@ -19,10 +19,11 @@ Base = declarative_base()
 
 
 class DBSessionManager:
-    def __init__(self):
-        self.__engine = create_async_engine(SQL_DATABASE_URL)
+    def __init__(self, sql_url):
+        self.__engine = create_async_engine(sql_url)
         self.__session_maker = async_sessionmaker(self.__engine, expire_on_commit=False)
 
+    @contextlib.asynccontextmanager
     async def connect(self) -> AsyncIterator[AsyncConnection]:
         if not self.__engine:
             raise Exception("SessionManager is not initialized")
@@ -49,7 +50,7 @@ class DBSessionManager:
             await session.close()
 
 
-session_manager = DBSessionManager()
+session_manager = DBSessionManager(SQL_DATABASE_URL)
 
 
 async def get_db_session():
