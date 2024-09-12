@@ -1,28 +1,58 @@
+import contextlib
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from typing import AsyncIterator
+
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncConnection, AsyncSession
+from sqlalchemy.orm import declarative_base
 from dotenv import load_dotenv
 
 load_dotenv()
 
-SQL_DATABASE_URL = ('postgresql+psycopg2://{}:{}@{}:{}/{}'
+SQL_DATABASE_URL = ('postgresql+asyncpg://{}:{}@{}:{}/{}'
                     .format(os.getenv("DB_USER"),
                             os.getenv("DB_PASSWORD"),
                             os.getenv("DB_HOST"),
                             os.getenv("DB_PORT"),
                             os.getenv("DB_NAME")))
 
-engine = create_engine(SQL_DATABASE_URL)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+class DBSessionManager:
+    def __init__(self, sql_url):
+        self.__engine = create_async_engine(sql_url)
+        self.__session_maker = async_sessionmaker(self.__engine, expire_on_commit=False)
+
+    @contextlib.asynccontextmanager
+    async def connect(self) -> AsyncIterator[AsyncConnection]:
+        if not self.__engine:
+            raise Exception("SessionManager is not initialized")
+
+        async with self.__engine.begin() as conn:
+            try:
+                yield conn
+            except Exception:
+                await conn.rollback()
+                raise
+
+    @contextlib.asynccontextmanager
+    async def session(self) -> AsyncIterator[AsyncSession]:
+        if not self.__session_maker:
+            raise Exception("SessionManager is not initialized")
+
+        session = self.__session_maker()
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+
+session_manager = DBSessionManager(SQL_DATABASE_URL)
+
+
+async def get_db_session():
+    async with session_manager.session() as session:
+        yield session

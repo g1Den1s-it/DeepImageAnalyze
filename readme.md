@@ -25,7 +25,15 @@
    ```bash
    pip install -r requirements.txt
    ```
-3. Run FastApi server
+3. Run the database using Docker Compose. 
    ```bash
-   python src/main.py
+   docker compose up --build
+   ```
+4. Apply migration to the database.
+   ```bash
+   alembic upgrade head
+   ```
+5. Run FastApi server
+   ```bash
+   python -m src.main
    ```
