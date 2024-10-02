@@ -1,0 +1,26 @@
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.report.schemas import ReportsListSchema
+from src.auth.models import User
+from src.report.models import Report
+
+
+async def get_all_user_reports(user_id: int, db: AsyncSession) -> list[ReportsListSchema]:
+    try:
+        query = select(Report).where(Report.user_id == user_id)
+
+        query_response = await db.execute(query)
+
+        reports = query_response.scalars().all()
+
+        report_list = [ReportsListSchema.parse_obj({
+            "id": report.id,
+            "title": report.title,
+            "image": report.image,
+            "report": report.report,
+            "create_at": report.create_at
+        }) for report in reports]
+        return report_list
+    except Exception as e:
+        raise e

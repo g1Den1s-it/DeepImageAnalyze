@@ -13,6 +13,7 @@ class UserOutputSchema(BaseModel):
 
 
 class UserInputSchema(BaseModel):
+    id: int = None
     username: str | None = Field(min_length=5, max_length=14, default="username")
     email: EmailStr
     password: str = Field(min_length=8)

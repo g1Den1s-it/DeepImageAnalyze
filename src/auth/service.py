@@ -55,7 +55,8 @@ async def get_current_user(user: UserInputSchema, db: AsyncSession) -> UserInput
         res = await db.execute(query)
 
         user_obj = res.scalars().first()
-        user = UserInputSchema.parse_obj({"username": user_obj.username,
+        user = UserInputSchema.parse_obj({"id": user_obj.id,
+                                          "username": user_obj.username,
                                           "email": user_obj.email,
                                           "password": user_obj.password_hash})
 

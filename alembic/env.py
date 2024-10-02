@@ -11,6 +11,7 @@ from src.database import Base
 from dotenv import load_dotenv
 
 from src.auth.models import User
+from src.report.models import Report
 
 load_dotenv()
 # this is the Alembic Config object, which provides
