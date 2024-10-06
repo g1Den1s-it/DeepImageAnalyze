@@ -24,3 +24,22 @@ async def get_all_user_reports(user_id: int, db: AsyncSession) -> list[ReportsLi
         return report_list
     except Exception as e:
         raise e
+
+
+async def create_report(user_id: int, data: ReportsListSchema, db: AsyncSession) -> Report:
+    try:
+        report = Report(
+            title=data.title,
+            image=data.image,
+            report=data.report,
+            user_id=user_id,
+            create_at=data.create_at
+        )
+
+        db.add(report)
+        await db.commit()
+
+        return report
+
+    except Exception as e:
+        raise e
