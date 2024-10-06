@@ -43,3 +43,16 @@ async def create_report(user_id: int, data: ReportsListSchema, db: AsyncSession)
 
     except Exception as e:
         raise e
+
+
+async def get_current_report(user_id: int, report_id: int, db: AsyncSession) -> Report:
+    try:
+        query = select(Report).where(Report.user_id == user_id, Report.id == report_id)
+        execute = await db.execute(query)
+
+        report = execute.scalars().first()
+
+        return report
+
+    except Exception as e:
+        raise e

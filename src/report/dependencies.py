@@ -74,3 +74,20 @@ async def create_user_report(data: ReportsListSchema,
     report = await service.create_report(user.id, data, db)
 
     return report
+
+
+async def get_detail_report(report_id: int,
+                            authorization: str = Header(None),
+                            db: AsyncSession = Depends(get_db_session)) -> ReportsListSchema:
+    if not authorization:
+        raise UnauthorizedUser()
+
+    if not authorization.startswith("Bearer "):
+        raise InvalidToken()
+
+    token = authorization[len("Bearer "):]
+    user = await get_user(token, db)
+
+    report = await service.get_current_report(user.id, report_id, db)
+
+    return report

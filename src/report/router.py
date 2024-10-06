@@ -2,11 +2,10 @@ from fastapi import APIRouter, status, Depends, Form, UploadFile, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db_session
-from src.report.dependencies import get_list_user_reports, create_user_report
+from src.report.dependencies import get_list_user_reports, create_user_report, get_detail_report
 from src.report.schemas import ReportsListSchema
 
 report_router = APIRouter(prefix="/api")
-
 
 
 @report_router.get("/reports/",
@@ -25,3 +24,9 @@ async def create_report(image: UploadFile,
                         db: AsyncSession = Depends(get_db_session)):
     return await create_user_report(ReportsListSchema(title=title), image, authorization, db)
 
+
+@report_router.get("/reports/{report_id}/",
+                   status_code=status.HTTP_200_OK,
+                   response_model=ReportsListSchema)
+async def detail_report(report: ReportsListSchema = Depends(get_detail_report)):
+    return report
